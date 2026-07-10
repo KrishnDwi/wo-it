@@ -1,0 +1,348 @@
+/* ==========================================
+   BASE & RESET
+   ========================================== */
+:root {
+    color-scheme: light;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f4f6fb;
+    color: #1f2937;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: #f4f6fb; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* ==========================================
+   LAYOUT UTAMA & SIDEBAR (Fixed & Anti-Terputus)
+   ========================================== */
+.layout {
+    display: block; /* Grid dihapus agar tidak bentrok */
+    min-height: 100vh;
+    max-width: 100%;
+}
+
+.sidebar {
+    position: fixed; /* KUNCI UTAMA: Memaku sidebar secara permanen di kiri layar */
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh; /* Memaksa tinggi pas 100% layar */
+    background: #111827;
+    color: #f9fafb;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    overflow-y: auto; /* Munculkan scrollbar jika menu terlalu banyak */
+    overflow-x: hidden;
+    z-index: 100; /* Pastikan selalu menutupi elemen lain */
+    transition: width 0.25s ease, padding 0.25s ease;
+}
+
+.content {
+    margin-left: 280px; /* KUNCI UTAMA: Mendorong konten ke kanan sebesar lebar sidebar */
+    padding: 2rem;
+    min-height: 100vh;
+    transition: margin-left 0.25s ease;
+}
+
+/* Bagian Brand & Navigasi */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.brand-mark {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.brand-text { overflow: hidden; transition: opacity 0.2s ease; }
+.sidebar-desc { overflow: hidden; transition: opacity 0.2s ease; margin-bottom: 1rem; }
+
+.nav { display: flex; flex-direction: column; gap: 0.5rem; padding-bottom: 2rem; }
+.nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.75rem;
+    color: #d1d5db;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.nav a:hover, .nav a.active {
+    background: rgba(255,255,255,0.08);
+    color: #f9fafb;
+}
+.nav-icon { font-size: 1.1rem; flex-shrink: 0; }
+.nav-label { overflow: hidden; transition: opacity 0.2s ease; }
+
+/* Sidebar Header & Menu Toggle */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.menu-toggle {
+    display: none; /* Sembunyikan di PC */
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: #f9fafb;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+/* ==========================================
+   KOMPONEN UMUM (Header, Card, Badge)
+   ========================================== */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+.topbar h1 { margin: 0; font-size: clamp(1.5rem, 2.25vw, 2.5rem); }
+.topbar p { margin: 0.25rem 0 0; color: #4b5563; }
+
+.badge { padding: 0.65rem 1rem; background: #e0f2fe; color: #0369a1; border-radius: 9999px; font-size: 0.9rem; font-weight: 600; }
+
+.card { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 20px 50px rgba(15,23,42,0.08); border: 1px solid rgba(148,163,184,0.12); margin-bottom: 1.5rem; }
+.card h2 { margin: 0 0 1rem; font-size: 1.125rem; font-weight: 700; }
+
+.grid-cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem; }
+.grid-cards .card { margin-bottom: 0; }
+.grid-cards .value { margin-top: 1rem; font-size: 2.25rem; font-weight: 700; color: #111827; }
+.grid-cards small { display: block; margin-top: 0.75rem; color: #6b7280; }
+
+/* ==========================================
+   FORM & FILTER
+   ========================================== */
+.filter-panel { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06); margin-bottom: 2rem; }
+.filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: end; min-width: 0; }
+.filter-grid > div { min-width: 0; }
+.filter-grid label { display: block; font-weight: 700; color: #334155; margin-bottom: 0.5rem; }
+.filter-grid input, .filter-grid select { width: 100%; padding: 0.85rem 1rem; border-radius: 0.75rem; border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; font-size: 0.95rem; }
+.filter-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.filter-actions button, .filter-actions a { display: inline-flex; align-items: center; justify-content: center; padding: 0.85rem 1rem; border-radius: 0.75rem; font-weight: 700; }
+.filter-actions button { background: #2563eb; color: white; border: none; cursor: pointer; }
+.filter-actions a { background: #e2e8f0; color: #0f172a; text-decoration: none; }
+
+/* ==========================================
+   TABLES & STATUS
+   ========================================== */
+.table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 1rem; margin-bottom: 2rem; }
+.table { width: 100%; border-collapse: collapse; background: white; border-radius: 1rem; overflow: hidden; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); }
+.table thead { background: #f8fafc; }
+.table th, .table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 0.95rem; }
+.table th { color: #6b7280; font-weight: 700; }
+.table tbody tr:last-child td { border-bottom: none; }
+.clickable-row { cursor: pointer; transition: background 0.2s ease; }
+.clickable-row:hover { background: #f8fafc; }
+
+.status { display: inline-flex; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+.status.open { background: #dcfce7; color: #166534; }
+.status.pending { background: #fef3c7; color: #92400e; }
+.status.completed { background: #dbeafe; color: #1d4ed8; }
+.status.on-progress { background: #dcfce7; color: #166534; }
+
+.message { margin-bottom: 1rem; padding: 1rem 1.25rem; border-radius: 0.75rem; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.back-link { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: #2563eb; font-weight: 600; }
+
+/* ==========================================
+   HALAMAN KHUSUS (Detail & Report)
+   ========================================== */
+.details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.details-grid div { background: #f8fafc; border-radius: 0.85rem; padding: 1rem; }
+.details-grid strong { display: block; font-weight: 700; margin-bottom: 0.35rem; }
+
+.status-form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.status-form select { border: 1px solid #cbd5e1; border-radius: 0.75rem; background: #f8fafc; color: #0f172a; padding: 0.85rem 1rem; min-width: 12rem; }
+.status-form button { border: none; border-radius: 0.75rem; background: #2563eb; color: white; padding: 0.85rem 1.25rem; cursor: pointer; font-weight: 700; }
+
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.metric-card { background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.03); border: 1px solid #e2e8f0; }
+.metric-card.total { border-bottom: 4px solid #6366f1; }
+.metric-card.pending { border-bottom: 4px solid #f59e0b; }
+.metric-card.progress { border-bottom: 4px solid #3b82f6; }
+.metric-card.completed { border-bottom: 4px solid #10b981; }
+.metric-card h3 { margin: 0; color: #64748b; font-size: 0.85rem; text-transform: uppercase; font-weight: 700; }
+.metric-card .value { font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0 0; color: #0f172a; }
+
+.data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+.bar-container { width: 100%; background: #e2e8f0; border-radius: 99px; height: 8px; margin-top: 8px; overflow: hidden; }
+.bar-fill { height: 100%; background: #2563eb; border-radius: 99px; }
+
+/* ==========================================
+   PAGINATION
+   ========================================== */
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    list-style: none;
+    gap: 0.35rem;
+    margin: 1.5rem 0 0 0;
+    justify-content: center;
+}
+.page-item .page-link {
+    display: block;
+    padding: 0.6rem 1rem;
+    color: #475569;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+.page-item .page-link:hover { background-color: #f1f5f9; color: #2563eb; border-color: #94a3b8; }
+.page-item.active .page-link { color: #fff; background-color: #2563eb; border-color: #2563eb; }
+.page-item.disabled .page-link { color: #94a3b8; pointer-events: none; background-color: #f8fafc; border-color: #e2e8f0; }
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+.footer {
+    color: #6b7280;
+    font-size: 0.95rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 3rem;
+}
+
+/* ==========================================
+   RESPONSIVE — TABLET (≤1024px)
+   Sidebar menyempit, label tetap ada
+   ========================================== */
+@media (max-width: 1024px) {
+    .sidebar { width: 220px; padding: 1.5rem 1rem; }
+    .content { margin-left: 220px; } /* Sesuaikan dorongan dengan lebar sidebar baru */
+    .brand { font-size: 1.1rem; }
+}
+
+/* ==========================================
+   RESPONSIVE — MOBILE (≤768px)
+   Sidebar berubah jadi navbar atas
+   ========================================== */
+@media (max-width: 768px) {
+    /* Layout: sidebar di atas, konten di bawah */
+    .layout { display: flex; flex-direction: column; }
+    
+    .sidebar {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: column; /* Ubah dari row ke column */
+        align-items: stretch;
+        padding: 1rem 1.25rem;
+        gap: 0;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    /* Tampilkan tombol hamburger */
+    .menu-toggle { display: flex; }
+
+    /* Sembunyikan nav secara default dan susun ke bawah */
+    .nav {
+        display: none; 
+        flex-direction: column; 
+        width: 100%;
+        margin-top: 1rem;
+        gap: 0.5rem;
+    }
+
+    /* Munculkan nav saat hamburger diklik (class active ditambahkan via JS) */
+    .nav.active {
+        display: flex;
+    }
+
+    /* Kembalikan ukuran padding link agar nyaman di-tap */
+    .nav a {
+        padding: 0.8rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* Efek animasi ikon Hamburger berubah jadi tanda silang (X) */
+    .menu-toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .menu-toggle.active span:nth-child(2) { opacity: 0; }
+    .menu-toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* Sembunyikan deskripsi */
+    .sidebar-desc { display: none; }
+
+    /* Brand di kiri */
+    .brand { font-size: 1rem; gap: 0.5rem; }
+    .brand-mark { width: 1.75rem; height: 1.75rem; font-size: 0.85rem; }
+    
+    /* Konten full width */
+    .content { margin-left: 0; padding: 1.25rem 1rem; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .topbar h1 { font-size: 1.4rem; }
+    .topbar > div:last-child { display: flex; flex-wrap: wrap; gap: 0.5rem; width: 100%; }
+    .topbar > div:last-child a { flex: 1 1 auto; text-align: center; justify-content: center; font-size: 0.875rem; padding: 0.6rem 0.75rem; }
+
+    /* Grid */
+    .grid-cards { grid-template-columns: repeat(2, 1fr); }
+    .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .filter-grid { grid-template-columns: 1fr; }
+    .details-grid { grid-template-columns: 1fr; }
+    .data-grid { grid-template-columns: 1fr; }
+
+    /* Filter actions */
+    .filter-actions { flex-direction: column; }
+    .filter-actions button, .filter-actions a { width: 100%; }
+
+    /* Status form */
+    .status-form { flex-direction: column; align-items: stretch; }
+    .status-form select { min-width: unset; }
+    .status-form button { width: 100%; }
+
+    .metric-card .value { font-size: 2rem; }
+    .grid-cards .value { font-size: 1.75rem; }
+}
+
+/* ==========================================
+   RESPONSIVE — SMALL MOBILE (≤480px)
+   ========================================== */
+@media (max-width: 480px) {
+    /* HAPUS .brand-text { display: none; } lalu ganti dengan ini agar teks tetap muncul tapi sedikit lebih kecil agar muat */
+    .brand-text { display: block; font-size: 0.9rem; white-space: nowrap; }
+    
+    .nav a { padding: 0.5rem; }
+    .content { padding: 1rem 0.85rem; }
+    .grid-cards { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .metric-card { padding: 1rem; }
+    .metric-card .value { font-size: 1.6rem; }
+    .grid-cards .value { font-size: 1.5rem; }
+    .card { padding: 1rem; }
+    .filter-panel { padding: 1rem; }
+    .topbar h1 { font-size: 1.2rem; }
+    .table th, .table td { padding: 0.75rem 0.85rem; font-size: 0.85rem; }
+}
