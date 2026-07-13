@@ -103,12 +103,8 @@ Route::post('/add', function (Request $request) {
         'description' => $workOrder->description,
     ]);
 
-    // Cari admin yang status is_wa_active nya true (sedang bertugas)
-    $activeAdmin = User::where('is_wa_active', true)->first();
-
-    $chatId = $activeAdmin && $activeAdmin->phone_number
-        ? $activeAdmin->phone_number
-        : env('TELEGRAM_CHAT_ID');
+    // Notifikasi WO baru selalu dikirim ke grup Telegram, bukan ke nomor HP admin
+    $chatId = config('services.telegram.chat_id') ?: env('TELEGRAM_CHAT_ID');
     $botToken = config('services.telegram.bot_token') ?: env('TELEGRAM_BOT_TOKEN');
 
     $message = "New work order created:\n\nWO Number: {$workOrder->wo_number}\nDepartment: {$workOrder->department}\nLocation: {$workOrder->location}\nIssue Type: {$workOrder->issue_type}\nDescription: {$workOrder->description}\n\nPlease check the details in the dashboard.";
