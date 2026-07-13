@@ -40,7 +40,7 @@
                 </div>
             @endif
 
-            <form action="/add" method="POST" enctype="multipart/form-data" target="_blank" onsubmit="setTimeout(function(){ window.location.href = '/'; }, 300);">
+            <form action="/add" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="grid">
                     <div>

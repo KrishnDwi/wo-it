@@ -132,7 +132,7 @@ class SettingsController extends Controller
             'is_wa_active' => $isActive,
         ]);
 
-        return redirect('/admin/settings/users')->with('success', 'Admin WhatsApp berhasil ditambahkan.');
+        return redirect('/admin/settings/users')->with('success', 'Admin Telegram berhasil ditambahkan.');
     }
 
     public function userUpdate(Request $request, $id)
@@ -157,6 +157,6 @@ class SettingsController extends Controller
             'is_wa_active' => $isActive,
         ]);
 
-        return redirect('/admin/settings/users')->with('success', 'Admin WhatsApp settings updated successfully.');
+        return redirect('/admin/settings/users')->with('success', 'Admin Telegram settings updated successfully.');
     }
 }

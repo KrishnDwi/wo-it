@@ -5,6 +5,8 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\IssueType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SettingsController;
@@ -93,20 +95,48 @@ Route::post('/add', function (Request $request) {
 
     $workOrder = WorkOrder::create($data);
 
+    \Log::info('WO created', [
+        'wo_number' => $workOrder->wo_number,
+        'department' => $workOrder->department,
+        'issue_type' => $workOrder->issue_type,
+        'location' => $workOrder->location,
+        'description' => $workOrder->description,
+    ]);
+
     // Cari admin yang status is_wa_active nya true (sedang bertugas)
     $activeAdmin = User::where('is_wa_active', true)->first();
 
-    if ($activeAdmin && $activeAdmin->phone_number) {
-        $whatsappNumber = $activeAdmin->phone_number;
-    } else {
-        // Fallback: Jika tidak ada admin aktif, gunakan dari .env atau default
-        $whatsappNumber = env('ADMIN_WHATSAPP_NUMBER', '628563978602');
+    $chatId = $activeAdmin && $activeAdmin->phone_number
+        ? $activeAdmin->phone_number
+        : env('TELEGRAM_CHAT_ID');
+    $botToken = config('services.telegram.bot_token') ?: env('TELEGRAM_BOT_TOKEN');
+
+    $message = "New work order created:\n\nWO Number: {$workOrder->wo_number}\nDepartment: {$workOrder->department}\nLocation: {$workOrder->location}\nIssue Type: {$workOrder->issue_type}\nDescription: {$workOrder->description}\n\nPlease check the details in the dashboard.";
+
+    if ($botToken && $chatId) {
+        try {
+            $response = Http::withOptions([
+                'connect_timeout' => 5,
+                'timeout' => 8,
+                'verify' => true,
+            ])->asForm()->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                'chat_id' => $chatId,
+                'text' => $message,
+                'parse_mode' => 'HTML',
+            ]);
+
+            if (! $response->successful()) {
+                \Log::warning('Telegram notification failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('Telegram notification failed: ' . $e->getMessage());
+        }
     }
 
-    $message = "Hello Admin, I have created a new work order:\n\nWO Number: {$workOrder->wo_number}\nDepartment: {$workOrder->department}\nLocation: {$workOrder->location}\nIssue Type: {$workOrder->issue_type}\nDescription: {$workOrder->description}\n\nPlease check the details in the dashboard. Thank you!";
-    $whatsappUrl = "https://wa.me/{$whatsappNumber}?text=" . urlencode($message);
-
-    return redirect($whatsappUrl);
+    return redirect('/')->with('success', 'Work order created successfully.');
 });
 
 // ============ SETTINGS ROUTES ============

@@ -32,8 +32,8 @@
         <main class="content">
             <div class="topbar">
                 <div>
-                    <h1>Manage WhatsApp Admins</h1>
-                    <p>Manage the WhatsApp admins who will receive notifications</p>
+                    <h1>Manage Telegram Admins</h1>
+                    <p>Manage the Telegram admins who will receive notifications</p>
                 </div>
             </div>
 
@@ -65,10 +65,10 @@
                                         <span class="badge-inactive">OFF</span>
                                     @endif
                                 </h3>
-                                <p style="font-size: 1.1rem; margin-top: 0.5rem;">Nomor WhatsApp: <strong style="color: #1f2937;">{{ $user->phone_number ?? 'Belum diatur' }}</strong></p>
+                                <p style="font-size: 1.1rem; margin-top: 0.5rem;">Chat ID Telegram: <strong style="color: #1f2937;">{{ $user->phone_number ?? 'Belum diatur' }}</strong></p>
                             </div>
                             <div class="option-actions" style="display: flex; align-items: center;">
-                                <button class="btn-edit" onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->phone_number }}', {{ $user->is_wa_active ? 'true' : 'false' }})">Edit Nomor / Status</button>
+                                <button class="btn-edit" onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->phone_number }}', {{ $user->is_wa_active ? 'true' : 'false' }})">Edit Chat ID / Status</button>
                             </div>
                         </div>
                     @endforeach
@@ -79,8 +79,8 @@
 
     <div id="addModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 2rem;">
         <div class="modal-content">
-            <h2 style="margin-top: 0;">Tambah Kontak Admin WA</h2>
-            <p style="color: #6b7280; margin-top: -10px; margin-bottom: 20px;">Masukkan nama dan nomor WhatsApp admin yang bertugas.</p>
+            <h2 style="margin-top: 0;">Tambah Kontak Admin Telegram</h2>
+            <p style="color: #6b7280; margin-top: -10px; margin-bottom: 20px;">Masukkan nama dan chat ID Telegram admin yang bertugas.</p>
             
             <form method="POST" action="/admin/settings/users">
                 @csrf
@@ -91,13 +91,13 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="phone_number">Nomor WhatsApp</label>
-                    <input type="text" name="phone_number" id="phone_number" placeholder="Contoh: 628563978602 (Gunakan 62, tanpa +)" value="{{ old('phone_number') }}">
+                    <label for="phone_number">Chat ID Telegram</label>
+                    <input type="text" name="phone_number" id="phone_number" placeholder="Contoh: 123456789" value="{{ old('phone_number') }}">
                 </div>
 
                 <div class="form-group checkbox-group">
                     <input type="checkbox" name="is_wa_active" id="is_wa_active" value="1">
-                    <label for="is_wa_active">Jadikan Admin ini penerima utama WA sekarang</label>
+                    <label for="is_wa_active">Jadikan Admin ini penerima utama Telegram sekarang</label>
                 </div>
 
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
@@ -110,19 +110,19 @@
 
     <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 2rem;">
         <div class="modal-content">
-            <h2 style="margin-top: 0;">Edit Nomor & Status WA</h2>
+            <h2 style="margin-top: 0;">Edit Chat ID & Status Telegram</h2>
             <p id="editAdminName" style="color: #1f2937; margin-top: -10px; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;"></p>
             
             <form id="editForm" method="POST">
                 @csrf
                 <div class="form-group">
-                    <label for="editPhone">Nomor WhatsApp Baru</label>
-                    <input type="text" name="phone_number" id="editPhone" placeholder="Contoh: 628563978602">
+                    <label for="editPhone">Chat ID Telegram Baru</label>
+                    <input type="text" name="phone_number" id="editPhone" placeholder="Contoh: 123456789">
                 </div>
                 
                 <div class="form-group checkbox-group">
                     <input type="checkbox" name="is_wa_active" id="editWaActive" value="1">
-                    <label for="editWaActive">Aktifkan Notifikasi WA untuk Admin ini</label>
+                    <label for="editWaActive">Aktifkan Notifikasi Telegram untuk Admin ini</label>
                 </div>
 
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
