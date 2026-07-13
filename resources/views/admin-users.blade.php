@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Admin WA | Admin</title>
+    <title>Manage Admin Telegram | Admin</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
         .option-card { background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
@@ -60,7 +60,7 @@
                                 <h3>
                                     {{ $user->name }}
                                     @if($user->is_wa_active)
-                                        <span class="badge-active">WA AKTIF</span>
+                                        <span class="badge-active">TELEGRAM AKTIF</span>
                                     @else
                                         <span class="badge-inactive">OFF</span>
                                     @endif

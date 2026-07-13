@@ -94,7 +94,7 @@ class SettingsController extends Controller
         return redirect('/admin/settings/issue-types')->with('success', 'Issue type deleted successfully.');
     }
 
-    // ============ USERS (ADMIN WA SETTINGS) ============
+    // ============ USERS (ADMIN TELEGRAM SETTINGS) ============
     
     public function userIndex()
     {
@@ -104,7 +104,7 @@ class SettingsController extends Controller
 
     public function userStore(Request $request)
     {
-        // Hanya perlu validasi Nama dan Nomor WA
+        // Hanya perlu validasi Nama dan Chat ID Telegram
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone_number' => 'nullable|string|max:20',
@@ -112,7 +112,7 @@ class SettingsController extends Controller
 
         $isActive = $request->has('is_wa_active');
 
-        // Jika user baru ini langsung diaktifkan WA-nya, matikan WA admin lain
+        // Jika user baru ini langsung diaktifkan Telegram-nya, matikan Telegram admin lain
         if ($isActive) {
             User::query()->update(['is_wa_active' => false]);
         }
@@ -143,11 +143,11 @@ class SettingsController extends Controller
             'phone_number' => 'nullable|string|max:20',
         ]);
 
-        // Cek apakah admin ini dicentang sebagai Admin Aktif WA
+        // Cek apakah admin ini dicentang sebagai Admin Aktif Telegram
         $isActive = $request->has('is_wa_active');
 
         // Opsional cerdas: Jika admin ini diaktifkan, maka sistem otomatis mematikan 
-        // status admin lainnya, agar WA hanya dikirim ke 1 admin saja.
+        // status admin lainnya, agar notifikasi Telegram hanya dikirim ke 1 admin saja.
         if ($isActive) {
             User::where('id', '!=', $id)->update(['is_wa_active' => false]);
         }

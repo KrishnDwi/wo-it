@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\WorkOrder;
-use App\Models\User;
 use App\Models\Department;
 use App\Models\IssueType;
 use Illuminate\Http\Request;
@@ -95,7 +94,7 @@ Route::post('/add', function (Request $request) {
 
     $workOrder = WorkOrder::create($data);
 
-    \Log::info('WO created', [
+    Log::info('WO created', [
         'wo_number' => $workOrder->wo_number,
         'department' => $workOrder->department,
         'issue_type' => $workOrder->issue_type,
@@ -122,13 +121,13 @@ Route::post('/add', function (Request $request) {
             ]);
 
             if (! $response->successful()) {
-                \Log::warning('Telegram notification failed', [
+                Log::warning('Telegram notification failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
             }
         } catch (\Throwable $e) {
-            \Log::warning('Telegram notification failed: ' . $e->getMessage());
+            Log::warning('Telegram notification failed: ' . $e->getMessage());
         }
     }
 
