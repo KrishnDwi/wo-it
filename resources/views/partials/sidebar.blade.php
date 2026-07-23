@@ -33,9 +33,6 @@
         <a href="/admin/settings/issue-types" class="{{ request()->is('admin/settings/issue-types') ? 'active' : '' }}" style="padding-left: 2rem;">
             <span class="nav-label">Issue Types</span>
         </a>
-        <a href="/admin/settings/users" class="{{ request()->is('admin/settings/users') ? 'active' : '' }}" style="padding-left: 2rem;">
-            <span class="nav-label">Pengaturan Admin Telegram</span>
-        </a>
     </nav>
 </aside>
 

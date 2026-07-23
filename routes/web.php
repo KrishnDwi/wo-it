@@ -144,8 +144,3 @@ Route::get('/admin/settings/issue-types', [SettingsController::class, 'issueType
 Route::post('/admin/settings/issue-types', [SettingsController::class, 'issueTypeStore']);
 Route::post('/admin/settings/issue-types/{id}/update', [SettingsController::class, 'issueTypeUpdate']);
 Route::post('/admin/settings/issue-types/{id}/delete', [SettingsController::class, 'issueTypeDelete']);
-
-
-Route::get('/admin/settings/users', [SettingsController::class, 'userIndex']);
-Route::post('/admin/settings/users', [SettingsController::class, 'userStore']);
-Route::post('/admin/settings/users/{id}/update', [SettingsController::class, 'userUpdate']);
