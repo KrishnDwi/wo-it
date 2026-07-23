@@ -106,7 +106,10 @@ Route::post('/add', function (Request $request) {
     $chatId = config('services.telegram.chat_id') ?: env('TELEGRAM_CHAT_ID');
     $botToken = config('services.telegram.bot_token') ?: env('TELEGRAM_BOT_TOKEN');
 
-    $message = "New work order created:\n\nWO Number: {$workOrder->wo_number}\nDepartment: {$workOrder->department}\nLocation: {$workOrder->location}\nIssue Type: {$workOrder->issue_type}\nDescription: {$workOrder->description}\n\nPlease check the details in the dashboard.";
+    $hardcodedBase = 'http://192.168.1.100'; // Ganti dengan base URL yang sesuai
+    $link = $hardcodedBase . "/admin/order/{$workOrder->id}";
+
+    $message = "New work order created:\n\nWO Number: {$workOrder->wo_number}\nDepartment: {$workOrder->department}\nLocation: {$workOrder->location}\nIssue Type: {$workOrder->issue_type}\nDescription: {$workOrder->description}\n\nDetails: <a href=\"{$link}\">Lihat Work Order</a>";
 
     if ($botToken && $chatId) {
         try {
