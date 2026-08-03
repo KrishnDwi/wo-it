@@ -13,6 +13,12 @@
             <ul class="nav-links">
                 <li><a href="/">Dashboard</a></li>
                 <li><a href="/add" class="active">Create Work Order</a></li>
+                <li>
+                    <form action="/add/logout" method="POST" style="display:inline">
+                        @csrf
+                        <button type="submit" class="link-button">Logout</button>
+                    </form>
+                </li>
             </ul>
             <button class="hamburger">
                 <span></span><span></span><span></span>
@@ -45,14 +51,7 @@
                 <div class="grid">
                     <div>
                         <label for="department">Department</label>
-                        <select id="department" name="department" required>
-                            <option value="">Select Department</option>
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept->name }}" {{ old('department') == $dept->name ? 'selected' : '' }}>
-                                    {{ $dept->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <input type="text" id="department" name="department" value="{{ $departmentName }}" readonly>
                     </div>
                     <div>
                         <label for="issue_type">Issue Type</label>

@@ -4,6 +4,7 @@ use App\Models\WorkOrder;
 use App\Models\Department;
 use App\Models\IssueType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -68,23 +69,62 @@ Route::get('/welcome', function () {
     return view('welcome');
 });
 
-Route::get('/add', function () {
-// Ambil semua data dari database
+Route::get('/add/login', function () {
     $departments = Department::orderBy('name')->get();
+    return view('add-login', compact('departments'));
+});
+
+Route::post('/add/login', function (Request $request) {
+    $validated = $request->validate([
+        'department' => 'required|exists:departments,name',
+        'password' => 'required|string',
+    ]);
+
+    $department = Department::where('name', $validated['department'])->first();
+
+    if (! $department || ! $department->password || ! Hash::check($validated['password'], $department->password)) {
+        return back()->withErrors(['password' => 'Department name or password is incorrect.'])->withInput();
+    }
+
+    $request->session()->put('department.id', $department->id);
+    $request->session()->put('department.name', $department->name);
+
+    return redirect('/add');
+});
+
+Route::post('/add/logout', function (Request $request) {
+    $request->session()->forget(['department.id', 'department.name']);
+    return redirect('/add/login');
+});
+
+Route::get('/add', function (Request $request) {
+    if (! $request->session()->has('department.id')) {
+        return redirect('/add/login');
+    }
+
+    $departmentName = $request->session()->get('department.name');
     $issueTypes = IssueType::orderBy('name')->get();
 
-    // Kirim data ke view
-    return view('add', compact('departments', 'issueTypes'));
+    return view('add', compact('departmentName', 'issueTypes'));
 });
 
 Route::post('/add', function (Request $request) {
-// Gunakan rule 'exists:nama_tabel,nama_kolom' untuk memvalidasi
+    if (! $request->session()->has('department.id')) {
+        return redirect('/add/login');
+    }
+
+    $departmentName = $request->session()->get('department.name');
+
     $data = $request->validate([
-        'department' => 'required|exists:departments,name',
+        'department' => ['required', function ($attribute, $value, $fail) use ($departmentName) {
+            if ($value !== $departmentName) {
+                $fail('You are only allowed to submit for the logged in department.');
+            }
+        }],
         'issue_type' => 'required|exists:issue_types,name',
         'location' => 'nullable|string|max:255',
         'description' => 'nullable|string',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Max 5MB
+        'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
     ]);
 
     // Jika user mengunggah gambar, simpan ke folder 'storage/app/public/work_orders'

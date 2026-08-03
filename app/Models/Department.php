@@ -6,6 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Department extends Model
 {
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'password', 'description'];
     public $timestamps = false;
 }

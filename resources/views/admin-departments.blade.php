@@ -17,7 +17,7 @@
         .btn-delete:hover { background: #dc2626; }
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; font-weight: 700; margin-bottom: 0.5rem; color: #334155; }
-        .form-group input[type="text"], .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; }
+        .form-group input[type="text"], .form-group input[type="password"], .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem; font-family: inherit; box-sizing: border-box; }
         .form-group textarea { resize: vertical; min-height: 80px; }
         .btn-submit { background: #10b981; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer; }
         .btn-submit:hover { background: #059669; }
@@ -87,6 +87,12 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" autocomplete="new-password" placeholder="Buat password login departemen" required>
+                    @error('password') <small style="color: #ef4444;">{{ $message }}</small> @enderror
+                </div>
+                
+                <div class="form-group">
                     <label for="description">Description (Optional)</label>
                     <textarea name="description" id="description" placeholder="Brief explanation about this department...">{{ old('description') }}</textarea>
                 </div>
@@ -105,9 +111,16 @@
             
             <form id="editForm" method="POST">
                 @csrf
+                <input type="hidden" name="edit_id" id="editId" value="{{ old('edit_id') }}">
                 <div class="form-group">
                     <label for="editName">Name</label>
                     <input type="text" name="name" id="editName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPassword">Password</label>
+                    <input type="password" name="password" id="editPassword" autocomplete="new-password" placeholder="Kosongkan jika tidak ingin mengubah password">
+                    <small style="color: #6b7280; display: block; margin-top: 0.35rem;">Kosongkan jika ingin mempertahankan password saat ini.</small>
                 </div>
                 
                 <div class="form-group">
@@ -133,8 +146,10 @@
         }
 
         function editDepartment(id, name, description) {
+            document.getElementById('editId').value = id;
             document.getElementById('editName').value = name;
             document.getElementById('editDescription').value = description || '';
+            document.getElementById('editPassword').value = '';
             document.getElementById('editForm').action = '/admin/settings/departments/' + id + '/update';
             
             document.getElementById('editModal').style.display = 'flex';
@@ -147,7 +162,16 @@
         document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) closeAddModal(); });
         document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
 
-        @if($errors->has('name'))
+        @if(old('edit_id'))
+            window.onload = function() {
+                const editId = @json(old('edit_id'));
+                document.getElementById('editForm').action = '/admin/settings/departments/' + editId + '/update';
+                document.getElementById('editName').value = @json(old('name')) || '';
+                document.getElementById('editDescription').value = @json(old('description')) || '';
+                document.getElementById('editModal').style.display = 'flex';
+                document.getElementById('editModal').style.alignItems = 'center';
+            }
+        @elseif($errors->any())
             window.onload = function() { openAddModal(); }
         @endif
     </script>

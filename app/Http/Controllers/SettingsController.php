@@ -23,10 +23,15 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:departments,name',
+            'password' => 'required|string|min:6',
             'description' => 'nullable|string',
         ]);
 
-        Department::create($validated);
+        Department::create([
+            'name' => $validated['name'],
+            'password' => Hash::make($validated['password']),
+            'description' => $validated['description'] ?? null,
+        ]);
 
         return redirect('/admin/settings/departments')->with('success', 'Department added successfully.');
     }
@@ -37,10 +42,20 @@ class SettingsController extends Controller
         
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:departments,name,' . $id,
+            'password' => 'nullable|string|min:6',
             'description' => 'nullable|string',
         ]);
 
-        $department->update($validated);
+        $updateData = [
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+        ];
+
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $department->update($updateData);
 
         return redirect('/admin/settings/departments')->with('success', 'Department updated successfully.');
     }

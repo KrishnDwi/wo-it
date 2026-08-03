@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Department;
 use App\Models\IssueType;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class OptionsSeeder extends Seeder
 {
@@ -12,16 +13,16 @@ class OptionsSeeder extends Seeder
     {
         // Default Departments
         $departments = [
-            ['name' => 'FB Kitchen', 'description' => 'Food & Beverage Kitchen'],
-            ['name' => 'Housekeeping', 'description' => 'Housekeeping Department'],
-            ['name' => 'Front Office', 'description' => 'Front Office Department'],
-            ['name' => 'DT', 'description' => 'Daily Transactions Department'],
-            ['name' => 'FB Service', 'description' => 'Food & Beverage Service'],
-            ['name' => 'P&C', 'description' => 'Property & Catering'],
-            ['name' => 'Security', 'description' => 'Security Department'],
-            ['name' => 'Sales', 'description' => 'Sales Department'],
-            ['name' => 'Acct', 'description' => 'Accounting Department'],
-            ['name' => 'A&G', 'description' => 'Administration & General'],
+            ['name' => 'FB Kitchen', 'description' => 'Food & Beverage Kitchen', 'password' => Hash::make('FB Kitchen')],
+            ['name' => 'Housekeeping', 'description' => 'Housekeeping Department', 'password' => Hash::make('Housekeeping')],
+            ['name' => 'Front Office', 'description' => 'Front Office Department', 'password' => Hash::make('Front Office')],
+            ['name' => 'DT', 'description' => 'Daily Transactions Department', 'password' => Hash::make('DT')],
+            ['name' => 'FB Service', 'description' => 'Food & Beverage Service', 'password' => Hash::make('FB Service')],
+            ['name' => 'P&C', 'description' => 'Property & Catering', 'password' => Hash::make('P&C')],
+            ['name' => 'Security', 'description' => 'Security Department', 'password' => Hash::make('Security')],
+            ['name' => 'Sales', 'description' => 'Sales Department', 'password' => Hash::make('Sales')],
+            ['name' => 'Acct', 'description' => 'Accounting Department', 'password' => Hash::make('Acct')],
+            ['name' => 'A&G', 'description' => 'Administration & General', 'password' => Hash::make('A&G')],
         ];
 
         // Default Issue Types
