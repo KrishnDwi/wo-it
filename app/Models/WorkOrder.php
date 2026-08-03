@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Models\Staff;
 
 class WorkOrder extends Model
 {
@@ -16,6 +17,7 @@ class WorkOrder extends Model
         'description',
         'location',
         'status',
+        'staff_id',
         'image',
         'resolution_note',
         'completed_at',
@@ -28,6 +30,11 @@ class WorkOrder extends Model
         'completed_at' => 'datetime',
         'started_at'   => 'datetime',
     ];
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
+    }
 
     protected static function boot()
     {

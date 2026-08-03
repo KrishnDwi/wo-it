@@ -81,6 +81,15 @@
                             </select>
                         </div>
                         <div>
+                            <label for="staff">Assigned Staff</label>
+                            <select id="staff" name="staff">
+                                <option value="">All Staff</option>
+                                @foreach($staff as $member)
+                                    <option value="{{ $member->id }}" {{ (isset($filters['staff']) && $filters['staff'] == $member->id) ? 'selected' : '' }}>{{ $member->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
                             <label for="status">Status</label>
                             <select id="status" name="status">
                                 <option value="">All Statuses</option>
@@ -118,6 +127,7 @@
                                 <th>WO Number</th>
                                 <th>Department</th>
                                 <th>Issue Type</th>
+                                <th>Assigned Staff</th>
                                 <th>Location</th>
                                 <th>Status</th>
                                 <th>Created</th>
@@ -130,6 +140,7 @@
                                     <td data-label="Nomor WO"><strong>{{ $order->wo_number }}</strong></td>
                                     <td data-label="Departemen">{{ $order->department }}</td>
                                     <td data-label="Jenis">{{ $order->issue_type }}</td>
+                                    <td data-label="Assigned Staff">{{ $order->staff ? $order->staff->name : '-' }}</td>
                                     <td data-label="Lokasi">{{ $order->location ?? '-' }}</td>
                                     <td data-label="Status">
                                         @if($order->status === 'Pending')

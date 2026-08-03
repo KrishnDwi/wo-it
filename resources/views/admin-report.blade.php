@@ -30,16 +30,25 @@
                             <label for="to_date">To Date</label>
                             <input type="date" name="to_date" id="to_date" value="{{ $filters['to_date'] ?? '' }}">
                         </div>
+                        <div>
+                            <label for="staff">Assigned Staff</label>
+                            <select id="staff" name="staff">
+                                <option value="">All Staff</option>
+                                @foreach($staff as $member)
+                                    <option value="{{ $member->id }}" {{ (isset($filters['staff']) && $filters['staff'] == $member->id) ? 'selected' : '' }}>{{ $member->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="filter-actions">
                             <button type="submit">Filter Data</button>
                             <a href="/admin/report" class="clear" style="background: #e2e8f0; color: #0f172a;">Reset</a>
                             
                             <div style="margin-left: auto; display: flex; gap: 0.5rem;">
-                                <a href="{{ url('/admin/report/pdf') }}?from_date={{ request('from_date') }}&to_date={{ request('to_date') }}" 
+                                <a href="{{ url('/admin/report/pdf') }}?from_date={{ request('from_date') }}&to_date={{ request('to_date') }}&staff={{ request('staff') }}" 
                                 style="background: #10b981; color: white; padding: 0.85rem 1rem; border-radius: 0.75rem; font-weight: 700;">
                                 Download PDF
                                 </a>
-                                <a href="{{ url('/admin/report/excel') }}?from_date={{ request('from_date') }}&to_date={{ request('to_date') }}" 
+                                <a href="{{ url('/admin/report/excel') }}?from_date={{ request('from_date') }}&to_date={{ request('to_date') }}&staff={{ request('staff') }}" 
                                 style="background: #3b82f6; color: white; padding: 0.85rem 1rem; border-radius: 0.75rem; font-weight: 700;">
                                 Download Excel
                                 </a>
@@ -93,6 +102,36 @@
                                         {{ $dept }}
                                         <div class="bar-container">
                                             <div class="bar-fill" style="width: {{ ($count / $maxDept) * 100 }}%; background: #6366f1;"></div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 1.1rem;">{{ $count }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+
+                <div class="card">
+                    <h2>By Assigned Staff</h2>
+                    @if($staffStats->isEmpty())
+                        <p style="color: #64748b; text-align: center; padding: 2rem 0;">No staff data available</p>
+                    @else
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Staff</th>
+                                    <th style="text-align: right;">Total WO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $maxStaff = $staffStats->max(); @endphp
+                                @foreach($staffStats as $name => $count)
+                                <tr>
+                                    <td>
+                                        {{ $name }}
+                                        <div class="bar-container">
+                                            <div class="bar-fill" style="width: {{ ($count / $maxStaff) * 100 }}%;"></div>
                                         </div>
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 1.1rem;">{{ $count }}</td>

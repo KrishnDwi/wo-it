@@ -29,6 +29,7 @@
         <tr><td>Nomor WO</td><td>{{ $order->wo_number }}</td></tr>
         <tr><td>Departemen</td><td>{{ $order->department }}</td></tr>
         <tr><td>Jenis Masalah</td><td>{{ $order->issue_type }}</td></tr>
+        <tr><td>Petugas</td><td>{{ $order->staff ? $order->staff->name : '-' }}</td></tr>
         <tr><td>Lokasi</td><td>{{ $order->location ?: '-' }}</td></tr>
         <tr>
             <td>Status</td>

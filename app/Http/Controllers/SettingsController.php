@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\IssueType;
+use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -92,6 +93,46 @@ class SettingsController extends Controller
         $issueType->delete();
 
         return redirect('/admin/settings/issue-types')->with('success', 'Issue type deleted successfully.');
+    }
+
+    // ============ STAFF MANAGEMENT ============
+
+    public function staffIndex()
+    {
+        $staff = Staff::all();
+        return view('admin-staff', compact('staff'));
+    }
+
+    public function staffStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:staff,name',
+        ]);
+
+        Staff::create($validated);
+
+        return redirect('/admin/settings/staff')->with('success', 'Staff added successfully.');
+    }
+
+    public function staffUpdate(Request $request, $id)
+    {
+        $staff = Staff::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:staff,name,' . $id,
+        ]);
+
+        $staff->update($validated);
+
+        return redirect('/admin/settings/staff')->with('success', 'Staff updated successfully.');
+    }
+
+    public function staffDelete($id)
+    {
+        $staff = Staff::findOrFail($id);
+        $staff->delete();
+
+        return redirect('/admin/settings/staff')->with('success', 'Staff deleted successfully.');
     }
 
     // ============ USERS (ADMIN TELEGRAM SETTINGS) ============

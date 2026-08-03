@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\WorkOrder;
 use App\Models\Department;
 use App\Models\IssueType;
+use App\Models\Staff;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
@@ -27,7 +28,8 @@ class AdminController extends Controller
     // 2. Work Orders List Page (+ Filter & Search Features)
     public function orders(Request $request)
     {
-        $filters = $request->only(['search', 'department', 'issue_type', 'status', 'from_date', 'to_date']);
+        $filters = $request->only(['search', 'department', 'issue_type', 'status', 'from_date', 'to_date', 'staff']);
+        $staff = Staff::orderBy('name')->get();
         
         $query = WorkOrder::query();
 
@@ -51,20 +53,25 @@ class AdminController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('staff')) {
+            $query->where('staff_id', $request->staff);
+        }
+
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('created_at', [$request->from_date, $request->to_date . ' 23:59:59']);
         }
 
         $workOrders = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('admin-orders', compact('workOrders', 'filters'));
+        return view('admin-orders', compact('workOrders', 'filters', 'staff'));
     }
 
     // 3. Work Order Detail Page
     public function show($id)
     {
         $order = WorkOrder::findOrFail($id);
-        return view('admin-detail', compact('order'));
+        $staff = Staff::orderBy('name')->get();
+        return view('admin-detail', compact('order', 'staff'));
     }
 
     // 4. Update Work Order Status
@@ -72,6 +79,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'status' => 'required|in:Pending,On Progress,Completed',
+            'staff_id' => 'required_if:status,On Progress|nullable|exists:staff,id',
             'resolution_note' => 'required_if:status,Completed|nullable|string'
         ]);
 
@@ -79,10 +87,11 @@ class AdminController extends Controller
         $order->status = $request->status;
 
         if ($request->status === 'On Progress') {
-            // Catat waktu mulai pengerjaan, hanya jika belum pernah di-set
+            // Catat waktu mulai pengerjaan, dan simpan petugas yang menerima WO
             if (!$order->started_at) {
                 $order->started_at = \Carbon\Carbon::now();
             }
+            $order->staff_id = $request->staff_id;
 
         } elseif ($request->status === 'Completed') {
             $order->resolution_note = $request->resolution_note;
@@ -113,6 +122,9 @@ class AdminController extends Controller
     // 5. Report Analysis Page (Web View)
     public function report(Request $request)
     {
+        $filters = $request->only(['from_date', 'to_date', 'staff']);
+        $staff = Staff::orderBy('name')->get();
+        $staffNames = $staff->pluck('name', 'id')->toArray();
         $query = \App\Models\WorkOrder::query();
 
         if ($request->filled('from_date')) {
@@ -120,6 +132,9 @@ class AdminController extends Controller
         }
         if ($request->filled('to_date')) {
             $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->filled('staff')) {
+            $query->where('staff_id', $request->staff);
         }
 
         $workOrders = $query->get();
@@ -154,22 +169,29 @@ class AdminController extends Controller
 
         $departmentStats = $workOrders->groupBy('department')->map->count();
         $issueStats = $workOrders->groupBy('issue_type')->map->count();
+        $staffStats = $workOrders->groupBy('staff_id')->mapWithKeys(function ($items, $staffId) use ($staffNames) {
+            $name = $staffNames[$staffId] ?? 'Unassigned';
+            return [$name => $items->count()];
+        });
 
         return view('admin-report', compact(
             'totalOrders', 'completedOrders', 'onProgressOrders', 'pendingOrders',
-            'departmentStats', 'issueStats', 'avgResolutionTime' // Send new variables to view
+            'departmentStats', 'issueStats', 'staffStats', 'avgResolutionTime', 'filters', 'staff' // Send new variables to view
         ));
     }
 
     // 6. Generate & Download Report PDF
     public function downloadPdf(Request $request)
     {
-        $filters = $request->only(['from_date', 'to_date']);
+        $filters = $request->only(['from_date', 'to_date', 'staff']);
         
         $query = WorkOrder::query();
         
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('created_at', [$request->from_date, $request->to_date . ' 23:59:59']);
+        }
+        if ($request->filled('staff')) {
+            $query->where('staff_id', $request->staff);
         }
 
         $workOrders = $query->get();
@@ -208,8 +230,11 @@ class AdminController extends Controller
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('created_at', [$request->from_date, $request->to_date . ' 23:59:59']);
         }
+        if ($request->filled('staff')) {
+            $query->where('staff_id', $request->staff);
+        }
 
-        $workOrders = $query->orderBy('created_at', 'desc')->get();
+        $workOrders = $query->with('staff')->orderBy('created_at', 'desc')->get();
 
         // Create CSV headers
         $headers = [
@@ -229,6 +254,7 @@ class AdminController extends Controller
                 'No. WO',
                 'Departemen',
                 'Jenis Masalah',
+                'Petugas',
                 'Deskripsi',
                 'Lokasi',
                 'Status',
@@ -255,6 +281,7 @@ class AdminController extends Controller
                     $order->wo_number,
                     $order->department,
                     $order->issue_type,
+                    $order->staff ? $order->staff->name : '-',
                     $order->description,
                     $order->location,
                     $order->status,
@@ -301,7 +328,7 @@ class AdminController extends Controller
             $query->whereBetween('created_at', [$request->from_date, $request->to_date . ' 23:59:59']);
         }
 
-        $workOrders = $query->orderBy('created_at', 'desc')->get();
+        $workOrders = $query->with('staff')->orderBy('created_at', 'desc')->get();
 
         // Create CSV headers
         $headers = [
@@ -321,6 +348,7 @@ class AdminController extends Controller
                 'No. WO',
                 'Departemen',
                 'Jenis Masalah',
+                'Petugas',
                 'Deskripsi',
                 'Lokasi',
                 'Status',
@@ -347,6 +375,7 @@ class AdminController extends Controller
                     $order->wo_number,
                     $order->department,
                     $order->issue_type,
+                    $order->staff ? $order->staff->name : '-',
                     $order->description,
                     $order->location,
                     $order->status,

@@ -33,6 +33,9 @@
         <a href="/admin/settings/issue-types" class="{{ request()->is('admin/settings/issue-types') ? 'active' : '' }}" style="padding-left: 2rem;">
             <span class="nav-label">Issue Types</span>
         </a>
+        <a href="/admin/settings/staff" class="{{ request()->is('admin/settings/staff') ? 'active' : '' }}" style="padding-left: 2rem;">
+            <span class="nav-label">Staff</span>
+        </a>
     </nav>
 </aside>
 

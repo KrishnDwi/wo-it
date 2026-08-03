@@ -73,6 +73,10 @@
                         </p>
                     </div>
                     <div>
+                        <strong>Assigned Staff</strong>
+                        <p>{{ $order->staff ? $order->staff->name : '-' }}</p>
+                    </div>
+                    <div>
                         <strong>Report Time</strong>
                         <p>{{ date('d/m/Y H:i', strtotime($order->created_at)) }}</p>
                     </div>
@@ -153,7 +157,15 @@
                     <form method="POST" action="/admin/order/{{ $order->id }}/update-status">
                         @csrf
                         <input type="hidden" name="status" value="On Progress">
-                        
+                        <div style="margin-bottom: 1.25rem;">
+                            <label for="staff_id" style="display: block; font-weight: 700; margin-bottom: 0.5rem; color: #334155;">Pick Staff</label>
+                            <select name="staff_id" id="staff_id" required style="width: 100%; padding: 0.85rem; border: 1px solid #cbd5e1; border-radius: 0.75rem; font-family: inherit;">
+                                <option value="">-- Pilih Petugas --</option>
+                                @foreach($staff as $member)
+                                    <option value="{{ $member->id }}" {{ old('staff_id') == $member->id ? 'selected' : '' }}>{{ $member->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <button type="submit" style="background: #f59e0b; color: white; border: none; padding: 0.85rem 1.5rem; border-radius: 0.75rem; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); transition: 0.2s;">
                             Accept WO
                         </button>
