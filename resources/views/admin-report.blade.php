@@ -126,8 +126,6 @@
                                 <tr>
                                     <th>Staff</th>
                                     <th style="text-align: right;">Total WO</th>
-                                    <th style="text-align: right;">Completed</th>
-                                    <th style="text-align: right;">% Done</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -141,8 +139,6 @@
                                         </div>
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 1.1rem;">{{ $s['total'] }}</td>
-                                    <td style="text-align: right; color: #64748b;">{{ $s['completed'] }}</td>
-                                    <td style="text-align: right; color: #64748b;">{{ $s['total'] > 0 ? round(($s['completed'] / $s['total']) * 100) : 0 }}%</td>
                                 </tr>
                                 @endforeach
                             </tbody>
