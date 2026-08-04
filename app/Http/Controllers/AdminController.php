@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\IssueType;
 use App\Models\Staff;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -143,6 +144,7 @@ class AdminController extends Controller
         $completedOrders = $workOrders->where('status', 'Completed')->count();
         $onProgressOrders = $workOrders->where('status', 'On Progress')->count();
         $pendingOrders = $workOrders->where('status', 'Pending')->count();
+        $completionRate = $totalOrders > 0 ? round(($completedOrders / $totalOrders) * 100, 1) : 0;
 
         // ==========================================
         // LOGIC TO CALCULATE AVERAGE WORK DURATION
@@ -167,16 +169,23 @@ class AdminController extends Controller
         }
         // ==========================================
 
-        $departmentStats = $workOrders->groupBy('department')->map->count();
-        $issueStats = $workOrders->groupBy('issue_type')->map->count();
-        $staffStats = $workOrders->groupBy('staff_id')->mapWithKeys(function ($items, $staffId) use ($staffNames) {
-            $name = $staffNames[$staffId] ?? 'Unassigned';
-            return [$name => $items->count()];
-        });
+        $departmentStats = $workOrders->groupBy('department')->map->count()->sortDesc();
+        $issueStats = $workOrders->groupBy('issue_type')->map->count()->sortDesc();
+        $staffStats = $workOrders->groupBy('staff_id')->map(function ($items, $staffId) use ($staffNames) {
+            return [
+                'name' => $staffNames[$staffId] ?? 'Unassigned',
+                'total' => $items->count(),
+                'completed' => $items->where('status', 'Completed')->count(),
+            ];
+        })->sortByDesc('total')->values();
+
+        // 5 lokasi paling sering dilaporkan bermasalah
+        $locationStats = $workOrders->filter(fn($o) => !empty($o->location))
+            ->groupBy('location')->map->count()->sortDesc()->take(5);
 
         return view('admin-report', compact(
-            'totalOrders', 'completedOrders', 'onProgressOrders', 'pendingOrders',
-            'departmentStats', 'issueStats', 'staffStats', 'avgResolutionTime', 'filters', 'staff' // Send new variables to view
+            'totalOrders', 'completedOrders', 'onProgressOrders', 'pendingOrders', 'completionRate',
+            'departmentStats', 'issueStats', 'staffStats', 'locationStats', 'avgResolutionTime', 'filters', 'staff' // Send new variables to view
         ));
     }
 
@@ -184,9 +193,12 @@ class AdminController extends Controller
     public function downloadPdf(Request $request)
     {
         $filters = $request->only(['from_date', 'to_date', 'staff']);
-        
+
+        $staffList = Staff::orderBy('name')->get();
+        $staffNames = $staffList->pluck('name', 'id')->toArray();
+
         $query = WorkOrder::query();
-        
+
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('created_at', [$request->from_date, $request->to_date . ' 23:59:59']);
         }
@@ -196,14 +208,67 @@ class AdminController extends Controller
 
         $workOrders = $query->get();
 
+        $totalOrders = $workOrders->count();
+        $pendingOrders = $workOrders->where('status', 'Pending')->count();
+        $onProgressOrders = $workOrders->where('status', 'On Progress')->count();
+        $completedOrders = $workOrders->where('status', 'Completed')->count();
+        $completionRate = $totalOrders > 0 ? round(($completedOrders / $totalOrders) * 100, 1) : 0;
+
+        // Rata-rata waktu penyelesaian (dari created_at ke completed_at)
+        $completedWithTime = $workOrders->where('status', 'Completed')->whereNotNull('completed_at');
+        $totalMinutes = 0;
+        foreach ($completedWithTime as $order) {
+            $totalMinutes += \Carbon\Carbon::parse($order->created_at)->diffInMinutes(\Carbon\Carbon::parse($order->completed_at));
+        }
+        $avgResolutionTime = '-';
+        if ($completedWithTime->count() > 0) {
+            $avgMinutes = $totalMinutes / $completedWithTime->count();
+            if ($avgMinutes >= 1440) {
+                $avgResolutionTime = round($avgMinutes / 1440, 1) . ' Hari';
+            } elseif ($avgMinutes >= 60) {
+                $avgResolutionTime = round($avgMinutes / 60, 1) . ' Jam';
+            } else {
+                $avgResolutionTime = round($avgMinutes) . ' Menit';
+            }
+        }
+
+        // Statistik per departemen & jenis masalah, diurutkan dari yang terbanyak
+        $departmentStats = $workOrders->groupBy('department')->map->count()->sortDesc();
+        $issueStats = $workOrders->groupBy('issue_type')->map->count()->sortDesc();
+
+        // Kinerja staff: jumlah ditangani vs diselesaikan per staff
+        $staffStats = $workOrders->groupBy('staff_id')->map(function ($items, $staffId) use ($staffNames) {
+            return [
+                'name' => $staffNames[$staffId] ?? 'Unassigned',
+                'total' => $items->count(),
+                'completed' => $items->where('status', 'Completed')->count(),
+            ];
+        })->sortByDesc('total')->values();
+
+        // 5 lokasi paling sering dilaporkan bermasalah
+        $locationStats = $workOrders->filter(fn($o) => !empty($o->location))
+            ->groupBy('location')->map->count()->sortDesc()->take(5);
+
+        // Nama staff yang jadi filter (kalau ada)
+        $staffFilterName = null;
+        if ($request->filled('staff')) {
+            $staffFilterName = $staffNames[$request->staff] ?? null;
+        }
+
         $data = [
             'filters' => $filters,
-            'totalOrders' => $workOrders->count(),
-            'pendingOrders' => $workOrders->where('status', 'Pending')->count(),
-            'onProgressOrders' => $workOrders->where('status', 'On Progress')->count(),
-            'completedOrders' => $workOrders->where('status', 'Completed')->count(),
-            'departmentStats' => $workOrders->groupBy('department')->map->count(),
-            'issueStats' => $workOrders->groupBy('issue_type')->map->count(),
+            'staffFilterName' => $staffFilterName,
+            'totalOrders' => $totalOrders,
+            'pendingOrders' => $pendingOrders,
+            'onProgressOrders' => $onProgressOrders,
+            'completedOrders' => $completedOrders,
+            'completionRate' => $completionRate,
+            'avgResolutionTime' => $avgResolutionTime,
+            'departmentStats' => $departmentStats,
+            'issueStats' => $issueStats,
+            'staffStats' => $staffStats,
+            'locationStats' => $locationStats,
+            'generatedAt' => now()->format('d/m/Y H:i'),
         ];
 
         // Load special PDF template from resources/views/pdf/report.blade.php
@@ -217,7 +282,18 @@ class AdminController extends Controller
     public function downloadWorkOrderPdf($id)
     {
         $order = WorkOrder::findOrFail($id);
-        $pdf = Pdf::loadView('pdf.work-order', compact('order'))->setPaper('a4', 'portrait');
+
+        // DomPDF can't reliably fetch images via URL/remote path, so we
+        // read the file from the public disk and embed it as base64.
+        $imageBase64 = null;
+        if ($order->image && Storage::disk('public')->exists($order->image)) {
+            $path = Storage::disk('public')->path($order->image);
+            $mime = mime_content_type($path);
+            $data = base64_encode(Storage::disk('public')->get($order->image));
+            $imageBase64 = "data:{$mime};base64,{$data}";
+        }
+
+        $pdf = Pdf::loadView('pdf.work-order', compact('order', 'imageBase64'))->setPaper('a4', 'portrait');
         $fileName = 'WO_' . $order->wo_number . '.pdf';
         return $pdf->download($fileName);
     }
@@ -403,32 +479,23 @@ class AdminController extends Controller
     // 11. Save Work Order Updates
     public function update(Request $request, $id)
     {
+        // Hanya detail laporan yang boleh diubah lewat halaman ini.
+        // Status penyelesaian (status, resolution_note, completed_at, duration_minutes)
+        // hanya bisa diubah lewat alur "update-status" di halaman detail.
         $request->validate([
             'department' => 'required|exists:departments,name',
             'issue_type' => 'required|exists:issue_types,name',
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:Pending,On Progress,Completed',
-            'resolution_note' => 'nullable|string',
-            'duration_minutes' => 'nullable|integer|min:0',
-            'completed_at' => 'nullable|date_format:Y-m-d H:i',
         ]);
 
         $order = WorkOrder::findOrFail($id);
-        
+
         $order->department = $request->department;
         $order->issue_type = $request->issue_type;
         $order->location = $request->location;
         $order->description = $request->description;
-        $order->status = $request->status;
-        $order->resolution_note = $request->resolution_note;
-        $order->duration_minutes = $request->duration_minutes;
-        
-        // Update completed_at if changed
-        if ($request->filled('completed_at')) {
-            $order->completed_at = $request->completed_at;
-        }
-        
+
         $order->save();
 
         return redirect()->route('admin.detail', $order->id)->with('success', 'Work order updated successfully!');

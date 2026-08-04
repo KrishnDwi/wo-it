@@ -75,10 +75,14 @@
                     <h3>Pending</h3>
                     <p class="value">{{ $pendingOrders }}</p>
                 </div>
-                {{-- <div class="metric-card" style="border-bottom: 4px solid #6366f1; background: #f8fafc;">
+                <div class="metric-card" style="border-bottom: 4px solid #10b981; background: #f8fafc;">
+                    <h3 style="color: #059669;">Completion Rate</h3>
+                    <p class="value" style="color: #059669;">{{ $completionRate }}%</p>
+                </div>
+                <div class="metric-card" style="border-bottom: 4px solid #6366f1; background: #f8fafc;">
                     <h3 style="color: #4f46e5;">⏱️ Average Duration</h3>
                     <p class="value" style="font-size: 1.8rem; margin-top: 1rem; color: #4f46e5;">{{ $avgResolutionTime }}</p>
-                </div> --}}
+                </div>
             </div>
 
             <div class="data-grid">
@@ -122,19 +126,23 @@
                                 <tr>
                                     <th>Staff</th>
                                     <th style="text-align: right;">Total WO</th>
+                                    <th style="text-align: right;">Completed</th>
+                                    <th style="text-align: right;">% Done</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $maxStaff = $staffStats->max(); @endphp
-                                @foreach($staffStats as $name => $count)
+                                @php $maxStaff = $staffStats->max('total'); @endphp
+                                @foreach($staffStats as $s)
                                 <tr>
                                     <td>
-                                        {{ $name }}
+                                        {{ $s['name'] }}
                                         <div class="bar-container">
-                                            <div class="bar-fill" style="width: {{ ($count / $maxStaff) * 100 }}%;"></div>
+                                            <div class="bar-fill" style="width: {{ $maxStaff > 0 ? ($s['total'] / $maxStaff) * 100 : 0 }}%;"></div>
                                         </div>
                                     </td>
-                                    <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 1.1rem;">{{ $count }}</td>
+                                    <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 1.1rem;">{{ $s['total'] }}</td>
+                                    <td style="text-align: right; color: #64748b;">{{ $s['completed'] }}</td>
+                                    <td style="text-align: right; color: #64748b;">{{ $s['total'] > 0 ? round(($s['completed'] / $s['total']) * 100) : 0 }}%</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -162,6 +170,36 @@
                                         {{ $issue }}
                                         <div class="bar-container">
                                             <div class="bar-fill" style="width: {{ ($count / $maxIssue) * 100 }}%;"></div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 1.1rem;">{{ $count }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+
+                <div class="card">
+                    <h2>Top 5 Problem Locations</h2>
+                    @if($locationStats->isEmpty())
+                        <p style="color: #64748b; text-align: center; padding: 2rem 0;">No data available</p>
+                    @else
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th style="text-align: right;">Total WO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $maxLocation = $locationStats->max(); @endphp
+                                @foreach($locationStats as $location => $count)
+                                <tr>
+                                    <td>
+                                        {{ $location }}
+                                        <div class="bar-container">
+                                            <div class="bar-fill" style="width: {{ ($count / $maxLocation) * 100 }}%; background: #f59e0b;"></div>
                                         </div>
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 1.1rem;">{{ $count }}</td>

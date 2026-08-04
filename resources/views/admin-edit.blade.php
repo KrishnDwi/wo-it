@@ -71,39 +71,23 @@
                         </div>
 
                         <div>
-                            <label for="status" style="display: block; font-weight: 700; margin-bottom: 0.5rem;">Status</label>
-                            <select name="status" id="status" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem;">
-                                <option value="Pending" {{ $order->status === 'Pending' ? 'selected' : '' }}>⏳ Pending</option>
-                                <option value="On Progress" {{ $order->status === 'On Progress' ? 'selected' : '' }}>🔧 On Progress</option>
-                                <option value="Completed" {{ $order->status === 'Completed' ? 'selected' : '' }}>✅ Completed</option>
-                            </select>
+                            <label style="display: block; font-weight: 700; margin-bottom: 0.5rem;">Status</label>
+                            <div style="padding: 0.75rem; background: #f1f5f9; border-radius: 0.5rem; font-weight: 700; color: #475569;">
+                                @if($order->status === 'Pending')
+                                    ⏳ Pending
+                                @elseif($order->status === 'On Progress')
+                                    🔧 On Progress
+                                @else
+                                    ✅ Completed
+                                @endif
+                                <span style="font-weight: 400; font-size: 0.85rem; display: block; margin-top: 0.25rem;">Ubah status lewat halaman detail work order.</span>
+                            </div>
                         </div>
                     </div>
 
                     <div style="margin-top: 1.5rem;">
                         <label for="description" style="display: block; font-weight: 700; margin-bottom: 0.5rem;">Deskripsi Laporan</label>
                         <textarea name="description" id="description" rows="4" placeholder="Deskripsi detail kendala..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem; font-family: inherit;">{{ $order->description }}</textarea>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>Status Penyelesaian</h2>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                        <div>
-                            <label for="completed_at" style="display: block; font-weight: 700; margin-bottom: 0.5rem;">Tanggal & Waktu Selesai</label>
-                            <input type="datetime-local" name="completed_at" id="completed_at" value="{{ $order->completed_at ? $order->completed_at->format('Y-m-d\TH:i') : '' }}" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem;">
-                        </div>
-
-                        <div>
-                            <label for="duration_minutes" style="display: block; font-weight: 700; margin-bottom: 0.5rem;">Durasi Pengerjaan (Menit)</label>
-                            <input type="number" name="duration_minutes" id="duration_minutes" value="{{ $order->duration_minutes ?? '' }}" placeholder="Contoh: 120" min="0" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem;">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="resolution_note" style="display: block; font-weight: 700; margin-bottom: 0.5rem;">Keterangan Penyelesaian</label>
-                        <textarea name="resolution_note" id="resolution_note" rows="4" placeholder="Deskripsi tindakan yang dilakukan untuk menyelesaikan kendala..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem; font-family: inherit;">{{ $order->resolution_note }}</textarea>
                     </div>
                 </div>
 

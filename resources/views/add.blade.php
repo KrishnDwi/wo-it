@@ -66,11 +66,11 @@
                     </div>
                     <div>
                         <label for="location">Location</label>
-                        <input id="location" name="location" type="text" placeholder="Example: Room 101, Floor 3" value="{{ old('location') }}">
+                        <input id="location" name="location" type="text" placeholder="Example: Room 101, Floor 3" value="{{ old('location') }}" required>
                     </div>
                     <div class="grid-full">
                         <label for="description">Work Order Description</label>
-                        <textarea id="description" name="description" placeholder="Explain the work requirement or issue...">{{ old('description') }}</textarea>
+                        <textarea id="description" name="description" placeholder="Explain the work requirement or issue..." required>{{ old('description') }}</textarea>
                     </div>
                     <div class="grid-full">
                         <label for="image">Attach Photo (Optional)</label>

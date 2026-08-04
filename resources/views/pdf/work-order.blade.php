@@ -15,6 +15,8 @@
         .badge-progress { color: #1e40af; background: #dbeafe; padding: 2px 8px; border-radius: 4px; }
         .badge-completed { color: #065f46; background: #d1fae5; padding: 2px 8px; border-radius: 4px; }
         .section-title { font-size: 13px; font-weight: bold; color: #2563eb; margin: 18px 0 6px; }
+        .photo-box { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
+        .photo-box img { max-width: 100%; max-height: 320px; }
         .footer { margin-top: 40px; font-size: 11px; color: #94a3b8; text-align: center; }
     </style>
 </head>
@@ -53,6 +55,13 @@
     <table>
         <tr><td colspan="2">{{ $order->description ?: 'Tidak ada deskripsi.' }}</td></tr>
     </table>
+
+    @if($imageBase64)
+    <p class="section-title">Foto Laporan</p>
+    <div class="photo-box">
+        <img src="{{ $imageBase64 }}" alt="Foto Laporan WO">
+    </div>
+    @endif
 
     @if($order->status === 'Completed' && $order->resolution_note)
     <p class="section-title">Catatan Penyelesaian</p>

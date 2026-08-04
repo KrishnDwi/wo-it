@@ -35,7 +35,6 @@ class OptionsSeeder extends Seeder
             ['name' => 'AV', 'description' => 'Audio & Visual Systems'],
             ['name' => 'SAFETY', 'description' => 'Safety & Emergency'],
             ['name' => 'KITCHEN EQUIPMENT', 'description' => 'Kitchen Equipment Issues'],
-            ['name' => 'OTHER', 'description' => 'Other Issues'],
         ];
 
         foreach ($departments as $dept) {
