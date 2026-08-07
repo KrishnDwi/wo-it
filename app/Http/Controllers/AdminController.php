@@ -501,7 +501,8 @@ class AdminController extends Controller
         return redirect()->route('admin.detail', $order->id)->with('success', 'Work order updated successfully!');
     }
 
-    // 12. Delete Work Order
+    // 12. Delete Work Order (soft delete — data tetap ada di database,
+    // hanya disembunyikan dari semua tampilan/laporan)
     public function delete($id)
     {
         $order = WorkOrder::findOrFail($id);

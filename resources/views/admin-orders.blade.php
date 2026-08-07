@@ -155,7 +155,7 @@
                                     <td data-label="Actions">
                                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                             {{-- <a href="/admin/order/{{ $order->id }}/edit" style="background: #f59e0b; color: white; padding: 0.4rem 0.8rem; border-radius: 0.4rem; text-decoration: none; font-size: 0.85rem; font-weight: 600;">Edit</a> --}}
-                                            <button onclick="deleteOrder({{ $order->id }})" style="background: #ef4444; color: white; padding: 0.4rem 0.8rem; border-radius: 0.4rem; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Delete</button>
+                                            <button onclick="deleteOrder(event, {{ $order->id }})" style="background: #ef4444; color: white; padding: 0.4rem 0.8rem; border-radius: 0.4rem; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Delete</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -178,15 +178,18 @@
 
     <script>
         function navigateToDetail(event, url) {
-            // Jangan navigasi jika yang diklik adalah kolom Aksi atau anak-anaknya
-            const aksiColumn = event.currentTarget.querySelector('[data-label="Aksi"]');
-            if (aksiColumn && aksiColumn.contains(event.target)) {
+            // Jangan navigasi jika yang diklik adalah kolom Actions atau anak-anaknya
+            const actionsColumn = event.currentTarget.querySelector('[data-label="Actions"]');
+            if (actionsColumn && actionsColumn.contains(event.target)) {
                 return;
             }
             window.location.href = url;
         }
 
-        function deleteOrder(orderId) {
+        function deleteOrder(event, orderId) {
+            // Cegah event "naik" ke <tr> supaya tidak ikut trigger navigateToDetail
+            event.stopPropagation();
+
             if (confirm('Are you sure you want to delete this work order? This action cannot be undone.')) {
                 const form = document.createElement('form');
                 form.method = 'POST';

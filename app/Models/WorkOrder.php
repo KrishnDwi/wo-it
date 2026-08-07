@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use App\Models\Staff;
 use Illuminate\Support\Facades\DB;
 
 class WorkOrder extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'work_order';
     public $timestamps = false;
 
@@ -51,11 +54,13 @@ class WorkOrder extends Model
                 $now = Carbon::parse($model->created_at);
                 $monthYear = $now->format('ym');
 
-                // Ambil nomor urut TERTINGGI yang pernah dipakai bulan ini
-                // (bukan menghitung jumlah baris yang tersisa), supaya nomor
-                // tidak bentrok setelah ada work order yang dihapus.
+                // Ambil nomor urut TERTINGGI yang pernah dipakai bulan ini,
+                // TERMASUK yang sudah di-soft-delete (withTrashed) — karena
+                // baris itu secara fisik masih ada di database dan wo_number-nya
+                // masih "menempel" di kolom unique, jadi tidak boleh dipakai ulang.
                 $sequence = DB::transaction(function () use ($monthYear) {
-                    $lastNumber = static::where('wo_number', 'like', $monthYear . '%')
+                    $lastNumber = static::withTrashed()
+                        ->where('wo_number', 'like', $monthYear . '%')
                         ->lockForUpdate()
                         ->orderByDesc('wo_number')
                         ->value('wo_number');
