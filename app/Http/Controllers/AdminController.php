@@ -31,7 +31,19 @@ class AdminController extends Controller
     {
         $filters = $request->only(['search', 'department', 'issue_type', 'status', 'from_date', 'to_date', 'staff']);
         $staff = Staff::orderBy('name')->get();
-        
+
+        // Gabungkan nama Master Data yang aktif dengan nilai department/issue_type
+        // yang benar-benar terpakai di data work order (termasuk yang sudah
+        // di-rename/dihapus dari Settings), supaya dropdown filter tetap bisa
+        // dipakai untuk mencari work order lama yang "nyasar".
+        $departmentOptions = Department::orderBy('name')->pluck('name')
+            ->merge(WorkOrder::distinct()->pluck('department'))
+            ->filter()->unique()->sort()->values();
+
+        $issueTypeOptions = IssueType::orderBy('name')->pluck('name')
+            ->merge(WorkOrder::distinct()->pluck('issue_type'))
+            ->filter()->unique()->sort()->values();
+
         $query = WorkOrder::query();
 
         if ($request->filled('search')) {
@@ -64,7 +76,7 @@ class AdminController extends Controller
 
         $workOrders = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('admin-orders', compact('workOrders', 'filters', 'staff'));
+        return view('admin-orders', compact('workOrders', 'filters', 'staff', 'departmentOptions', 'issueTypeOptions'));
     }
 
     // 3. Work Order Detail Page
@@ -473,7 +485,19 @@ class AdminController extends Controller
     public function edit($id)
     {
         $order = WorkOrder::findOrFail($id);
-        return view('admin-edit', compact('order'));
+
+        $masterDepartments = Department::orderBy('name')->pluck('name');
+        $masterIssueTypes = IssueType::orderBy('name')->pluck('name');
+
+        // Selalu sertakan nilai department/issue_type yang SEDANG dipakai WO ini,
+        // walaupun sudah di-rename/dihapus dari Master Data — supaya dropdown
+        // tidak "salah pilih" opsi pertama dan diam-diam mengubah data saat disimpan.
+        // Pakai concat() (bukan push()) supaya $masterDepartments/$masterIssueTypes
+        // aslinya tidak ikut berubah, karena masih dipakai untuk cek "orphaned".
+        $departmentOptions = $masterDepartments->concat([$order->department])->filter()->unique()->sort()->values();
+        $issueTypeOptions = $masterIssueTypes->concat([$order->issue_type])->filter()->unique()->sort()->values();
+
+        return view('admin-edit', compact('order', 'departmentOptions', 'issueTypeOptions', 'masterDepartments', 'masterIssueTypes'));
     }
 
     // 11. Save Work Order Updates

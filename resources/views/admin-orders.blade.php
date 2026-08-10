@@ -66,7 +66,7 @@
                             <label for="department">Department</label>
                             <select id="department" name="department">
                                 <option value="">All Departments</option>
-                                @foreach(["FB Kitchen","Housekeeping","Front Office","DT","FB Service","P&C","Security","Sales","Acct","A&G"] as $department)
+                                @foreach($departmentOptions as $department)
                                     <option value="{{ $department }}" {{ (isset($filters['department']) && $filters['department'] === $department) ? 'selected' : '' }}>{{ $department }}</option>
                                 @endforeach
                             </select>
@@ -75,7 +75,7 @@
                             <label for="issue_type">Issue Type</label>
                             <select id="issue_type" name="issue_type">
                                 <option value="">All Types</option>
-                                @foreach(["ELECTRICAL","MECHANICAL","PLUMBING","HVAC","BUILDING","FURNITURE","AV","SAFETY","OTHER"] as $type)
+                                @foreach($issueTypeOptions as $type)
                                     <option value="{{ $type }}" {{ (isset($filters['issue_type']) && $filters['issue_type'] === $type) ? 'selected' : '' }}>{{ $type }}</option>
                                 @endforeach
                             </select>
