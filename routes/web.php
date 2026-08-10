@@ -105,12 +105,27 @@ Route::get('/add', function (Request $request) {
     $departmentName = $request->session()->get('department.name');
     $issueTypes = IssueType::orderBy('name')->get();
 
-    return view('add', compact('departmentName', 'issueTypes'));
+    // Token sekali-pakai untuk mencegah submit ganda (klik Save berkali-kali,
+    // double-tap di HP, dsb). Setiap kali halaman form dibuka, token baru dibuat.
+    $formToken = \Illuminate\Support\Str::random(40);
+    $request->session()->put('add_form_token', $formToken);
+
+    return view('add', compact('departmentName', 'issueTypes', 'formToken'));
 });
 
 Route::post('/add', function (Request $request) {
     if (! $request->session()->has('department.id')) {
         return redirect('/add/login');
+    }
+
+    // Kalau token tidak cocok (sudah dipakai / kadaluarsa), berarti ini submit
+    // ulang dari klik ganda sebelumnya — jangan buat WO baru lagi, cukup arahkan
+    // kembali dengan pesan bahwa laporan sebelumnya sudah tersimpan.
+    $submittedToken = $request->input('form_token');
+    $expectedToken = $request->session()->get('add_form_token');
+
+    if (! $submittedToken || $submittedToken !== $expectedToken) {
+        return redirect('/')->with('success', 'Work order created successfully.');
     }
 
     $departmentName = $request->session()->get('department.name');
@@ -126,6 +141,10 @@ Route::post('/add', function (Request $request) {
         'description' => 'nullable|string',
         'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
     ]);
+
+    // Token baru dibakar SETELAH validasi lolos, supaya kalau validasi gagal
+    // (misal lupa isi Jenis Masalah), token masih berlaku saat user submit ulang.
+    $request->session()->forget('add_form_token');
 
     // Jika user mengunggah gambar, simpan ke folder 'storage/app/public/work_orders'
     if ($request->hasFile('image')) {

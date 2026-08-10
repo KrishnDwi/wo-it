@@ -46,8 +46,9 @@
                 </div>
             @endif
 
-            <form action="/add" method="POST" enctype="multipart/form-data">
+            <form action="/add" method="POST" enctype="multipart/form-data" id="wo-form">
                 @csrf
+                <input type="hidden" name="form_token" value="{{ $formToken }}">
                 <div class="grid">
                     <div>
                         <label for="department">Department</label>
@@ -66,11 +67,11 @@
                     </div>
                     <div>
                         <label for="location">Location</label>
-                        <input id="location" name="location" type="text" placeholder="Example: Room 101, Floor 3" value="{{ old('location') }}" required>
+                        <input id="location" name="location" type="text" placeholder="Example: Room 101, Floor 3" value="{{ old('location') }}">
                     </div>
                     <div class="grid-full">
                         <label for="description">Work Order Description</label>
-                        <textarea id="description" name="description" placeholder="Explain the work requirement or issue..." required>{{ old('description') }}</textarea>
+                        <textarea id="description" name="description" placeholder="Explain the work requirement or issue...">{{ old('description') }}</textarea>
                     </div>
                     <div class="grid-full">
                         <label for="image">Attach Photo (Optional)</label>
@@ -79,7 +80,7 @@
                     </div>
                 </div>
                 <div class="actions">
-                    <button type="submit">Save Work Order</button>
+                    <button type="submit" id="wo-submit-btn">Save Work Order</button>
                 </div>
             </form>
         </div>
@@ -100,6 +101,15 @@
                     hamburger.classList.remove('active');
                     navLinks.classList.remove('active');
                 });
+            });
+
+            // Cegah submit ganda: begitu form disubmit (validasi HTML5 sudah lolos),
+            // tombol langsung dikunci supaya klik berkali-kali tidak bikin WO dobel.
+            const woForm = document.getElementById('wo-form');
+            const woSubmitBtn = document.getElementById('wo-submit-btn');
+            woForm?.addEventListener('submit', function() {
+                woSubmitBtn.disabled = true;
+                woSubmitBtn.textContent = 'Menyimpan...';
             });
         });
     </script>
